@@ -1,0 +1,34 @@
+services:
+  custom_admin_menu.manager:
+    class: Drupal\custom_admin_menu\Service\CustomAdminMenuManager
+    arguments:
+      - '@current_user'
+      - '@toolbar.menu_tree'
+      - '@theme.manager'
+      - '@entity_type.manager'
+      - '@config.factory'
+      - '@theme.initialization'
+      - '@module_handler'
+      - '@custom_admin_menu.settings'
+      - '@custom_admin_menu.menu_item_display_manager'
+
+  custom_admin_menu.settings:
+    class: Drupal\custom_admin_menu\Service\CustomAdminMenuSettings
+    arguments: [ '@config.factory' ]
+
+  custom_admin_menu.shortcuts:
+    class: Drupal\custom_admin_menu\Service\CustomAdminMenuShortcuts
+    arguments:
+      - '@theme.manager'
+      - '@theme.initialization'
+      - '@entity_type.manager'
+      - '@config.factory'
+      - '@request_stack'
+      - '@title_resolver'
+      - '@custom_admin_menu.settings'
+
+  custom_admin_menu.menu_item_display_manager:
+    class: Drupal\custom_admin_menu\Service\CustomAdminMenuMenuItemDisplayManager
+    arguments:
+      - '@current_user'
+      - '@language_manager'

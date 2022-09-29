@@ -1,0 +1,13 @@
+name: Custom Admin Menu
+type: module
+description: Add a custom admin menu
+package: Administration
+core: 8.x
+core_version_requirement: ^8 || ^9
+dependencies:
+  - drupal:admin_toolbar
+
+# Information added by Drupal.org packaging script on 2022-07-11
+version: '1.0.0-rc8'
+project: 'custom_admin_menu'
+datestamp: 1657545398

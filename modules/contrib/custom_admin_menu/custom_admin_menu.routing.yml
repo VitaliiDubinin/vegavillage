@@ -1,0 +1,28 @@
+custom_admin_menu.node_edit:
+  path: '/admin/node/edit'
+  defaults:
+    _controller: '\Drupal\custom_admin_menu\Controller\CustomAdminMenuController::nodeEditFormRedirect'
+  requirements:
+    _permission: 'access content overview'
+
+custom_admin_menu.term_edit:
+  path: '/admin/term/edit'
+  defaults:
+    _controller: '\Drupal\custom_admin_menu\Controller\CustomAdminMenuController::termEditFormRedirect'
+  requirements:
+    _permission: 'access content overview'
+
+custom_admin_menu.entity_edit:
+  path: '/admin/{entity_type}/edit'
+  defaults:
+    _controller: '\Drupal\custom_admin_menu\Controller\CustomAdminMenuController::entityEditFormRedirect'
+  requirements:
+    _permission: 'access content overview'
+
+custom_admin_menu.settings_form:
+  path: '/admin/config/system/custom-admin-menu'
+  defaults:
+    _title: 'Custom Admin Menu settings'
+    _form: 'Drupal\custom_admin_menu\Form\SettingsForm'
+  requirements:
+    _permission: 'administer custom_admin_menu configuration'

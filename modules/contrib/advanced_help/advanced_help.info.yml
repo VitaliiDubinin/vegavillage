@@ -1,0 +1,9 @@
+name: Advanced Help
+type: module
+description: 'Provide extended help and documentation.'
+core_version_requirement: ^8.8 || ^9
+
+# Information added by Drupal.org packaging script on 2021-10-02
+version: '8.x-1.0'
+project: 'advanced_help'
+datestamp: 1633180874

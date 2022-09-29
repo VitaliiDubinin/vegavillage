@@ -1,0 +1,6 @@
+custom_admin_menu.settings_form:
+  title: Custom Admin Menu
+  description: Configure Custom Admin Menu.
+  parent: system.admin_config_ui
+  route_name: custom_admin_menu.settings_form
+  weight: 10

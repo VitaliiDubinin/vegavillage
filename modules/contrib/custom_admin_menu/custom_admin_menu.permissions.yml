@@ -1,0 +1,14 @@
+administer custom_admin_menu configuration:
+  title: 'Administer custom_admin_menu configuration'
+  description: 'Optional description.'
+  restrict access: true
+
+access_default_menu:
+  title: 'Accéder au menu Default'
+  description: 'Accéder au menu "Default" de la toolbar.'
+  restrict access: true
+
+access_custom_menu:
+  title: 'Accéder au menu Custom'
+  description: 'Accéder au menu "Custom" de la toolbar.'
+  restrict access: true

@@ -1,0 +1,152 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Custom Admin Menu module.
+ *
+ * @DCG
+ * This file is no longer required in Drupal 8.
+ * @see https://www.drupal.org/node/2217931
+ */
+
+use Drupal\custom_admin_menu\Service\CustomAdminMenuSettings;
+use Drupal\custom_admin_menu\Service\CustomAdminMenuManager;
+use Drupal\custom_admin_menu\Service\CustomAdminMenuShortcuts;
+use Drupal\custom_admin_menu\Service\CustomAdminMenuMenuItemDisplayManager;
+
+/**
+ * Implements hook_theme().
+ */
+function custom_admin_menu_theme($existing, $type, $theme, $path)
+{
+  return [
+    'custom_admin_menu_shortcuts' => [
+      'variables' => ['blocks' => NULL],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess().
+ */
+function custom_admin_menu_preprocess_menu(&$variables)
+{
+  $settings = CustomAdminMenuSettings::me();
+  if (!$settings->get(CustomAdminMenuSettings::FIELD_ENABLE)) {
+    return;
+  }
+
+  if ($settings->get(CustomAdminMenuSettings::FIELD_INCLUDED_IN_ADMIN)) {
+    if (isset($variables['theme_hook_original']) && $variables['theme_hook_original'] == 'menu__toolbar__admin') {
+
+      $manager = CustomAdminMenuManager::me();
+
+      // Separate index (drupal main actions) from other elements.
+      $mainItems = array_intersect_key($variables['items'], [
+        'admin_toolbar_tools.help' => NULL,
+        'admin_toolbar_tools.flush' => NULL,
+      ]);
+      $defaultItems = array_diff_key($variables['items'], $mainItems);
+
+      // Wrap the default admin menu.
+      if ($settings->get(CustomAdminMenuSettings::FIELD_WRAP_DEFAULT_ADMIN)) {
+        $defaultItems =
+          [
+            'custom_admin_menu.config' =>
+              [
+                "is_expanded" => TRUE,
+                "is_collapsed" => TRUE,
+                "in_active_trail" => FALSE,
+                "title" => "Admin",
+                "url" => reset($defaultItems)['url']->setOption('attributes', [
+                  'class' => [
+                    'toolbar-icon',
+                    'toolbar-icon-system-admin-config',
+                  ],
+                ]),
+                "attributes" => reset($defaultItems)['attributes'],
+                "original_link" => reset($defaultItems)['original_link'],
+                "below" => $defaultItems,
+              ],
+          ];
+      }
+
+      if (!$manager->userCanSeeDefaultAdminMenu()) {
+        // Only index.
+        $defaultItems = [];
+      }
+
+      // If user can see custom admin menu.
+      if ($manager->userCanSeeCustomAdminMenu()) {
+        // Build the menu.
+        $customMenuBuildArray = $manager->getCustomMenuContent();
+
+        if (isset($customMenuBuildArray['#items']) && !empty($customMenuBuildArray['#items'])) {
+          $insertionType = CustomAdminMenuSettings::me()
+            ->get(CustomAdminMenuSettings::FIELD_INSERTION_TYPE);
+
+          // Append items in default admin menu.
+          switch ($insertionType) {
+            case CustomAdminMenuSettings::INSERTION_TYPE_PREPEND:
+              $variables['items'] = array_merge($mainItems, $customMenuBuildArray['#items'], $defaultItems);
+              break;
+
+            case
+            CustomAdminMenuSettings::INSERTION_TYPE_APPEND:
+              $variables['items'] = array_merge($mainItems, $defaultItems, $customMenuBuildArray['#items']);
+              break;
+          }
+        }
+      }
+    }
+  }
+
+  if (isset($variables['items']) && !empty($variables['items'])) {
+    $first = reset($variables['items']);
+    if (isset($first['original_link']) &&
+      $first['original_link']->getPluginDefinition()['menu_name'] === CustomAdminMenuManager::CUSTOM_MENU_NAME) {
+      CustomAdminMenuMenuItemDisplayManager::me()
+        ->initMenuItemsDisplayState($variables['items']);
+    }
+  }
+}
+
+/**
+ * Implements hook_toolbar_alter().
+ */
+function custom_admin_menu_toolbar_alter(&$items)
+{
+  $settings = CustomAdminMenuSettings::me();
+  if (!$settings->get(CustomAdminMenuSettings::FIELD_ENABLE)) {
+    return;
+  }
+
+  if (!$settings->get(CustomAdminMenuSettings::FIELD_INCLUDED_IN_ADMIN)) {
+    $manager = CustomAdminMenuManager::me();
+    if (!$manager->userCanSeeDefaultAdminMenu()) {
+      unset($items['administration']);
+    }
+
+    if ($manager->userCanSeeCustomAdminMenu()) {
+      $manager->addCustomAdminMenuEntries($items);
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess().
+ */
+function custom_admin_menu_preprocess_toolbar(&$variables)
+{
+  $settings = CustomAdminMenuSettings::me();
+  if (!$settings->get(CustomAdminMenuSettings::FIELD_ENABLE)) {
+    return;
+  }
+
+  $shortcuts = CustomAdminMenuShortcuts::me();
+  if ($shortcuts->hasShortcut()) {
+    $variables['remainder'] = $shortcuts->buildShortcuts();
+  }
+
+  $variables['#cache']['contexts'][] = 'user';
+}
